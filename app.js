@@ -32,27 +32,63 @@ app.get('/products/:id', (req, res) => {
 
 // POST a new product
 app.post('/products', (req, res) => {
-  const newProduct = {
-    id: products.length + 1,
-    name: req.body.name,
-    category: req.body.category,
-    price: req.body.price,
-    stock: req.body.stock
-  };
-  products.push(newProduct);
-  res.json(newProduct);
-  console.log(newProduct);
+  if (!req.body.name || !req.body.price || !req.body.stock) {
+    res.status(404).send('Please specify the product name ,price or stock of the product.');
+  }
+
+  if ((Number.isInteger(req.body.price)) & (Number.isInteger(req.body.stock))) {
+    if (!req.body.category) {
+      const newProduct = {
+        id: products.length + 1,
+        name: String(req.body.name),
+        category: "-",
+        price: req.body.price,
+        stock: req.body.stock
+      };
+      products.push(newProduct);
+      res.json(newProduct);
+      console.log(newProduct);
+    }
+    else {
+      const newProduct = {
+        id: products.length + 1,
+        name: String(req.body.name),
+        category: req.body.category,
+        price: req.body.price,
+        stock: req.body.stock
+      };
+      products.push(newProduct);
+      res.json(newProduct);
+      console.log(newProduct);
+    }
+  }
+  else {
+    return res.status(404).send('price and stock must be Number');
+  }
+
 });
 
 // PUT update product details
 app.put('/products/:id', (req, res) => {
   const product = products.find(p => p.id === parseInt(req.params.id));
+  let product_category = String(req.body.category)
+  let product_name = String(req.body.category)
+
   if (!product) return res.status(404).send('Product not found');
 
-  product.name = req.body.name;
-  product.category = req.body.category;
-  product.price = req.body.price;
-  product.stock = req.body.stock;
+  if (!req.body.category) product_category = product.category ;
+  if (!req.body.name) product_name = product.name ;
+
+  if ((Number.isInteger(req.body.price)) & (Number.isInteger(req.body.stock))) {
+    product.name = product_name
+    product.category = product_category
+    product.price = req.body.price
+    product.stock = req.body.stock
+  }
+  else {
+    res.status(404).send('Please specify price and stock of the product(Must be Number).');
+  }
+
 
   res.json(product);
 });
